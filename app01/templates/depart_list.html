@@ -1,0 +1,50 @@
+{% extends "index_layout.html" %}
+
+{% block title %}
+<title>部门列表</title>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    <a href="/depart/add/" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+        创建部门</a>
+</div>
+
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">
+        <span class="glyphicon glyphicon-th-list" aria-hidden="true">
+        部门列表
+        </span>
+    </div>
+
+    <!-- Table -->
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>名称</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for obj in querst %}
+        <tr>
+            <th>{{ obj.id }}</th>
+            <td>{{ obj.title }}</td>
+            <td>
+            <a href="/depart/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+            <a href="/depart/delete/?nid={{ obj.id }}" class="btn btn-danger btn-xs">删除</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+<div class="container" style="margin: 0 auto; display: flex; justify-content: center; align-items: center;">
+    <ul class="pagination">
+        {{page_string}}
+    </ul>
+</div>
+{% endblock %}

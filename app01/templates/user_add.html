@@ -1,0 +1,86 @@
+{% extends "index_layout.html" %}
+
+{% block title %}
+<title>添加用户</title>
+{% endblock %}
+
+{% block css %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'dateTime/bootstrap-datepicker.min.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">新建用户</h3>
+    </div>
+    <div class="panel-body">
+        <form class="panel-body" method="post">
+            <div class="form-group">
+                <label for="">姓名</label>
+                <input type="text" class="form-control" name="user" placeholder="姓名">
+            </div>
+
+            <div class="form-group">
+                <label for="">密码</label>
+                <input type="text" class="form-control" name="pwd" placeholder="密码">
+            </div>
+
+            <div class="form-group">
+                <label for="">年龄</label>
+                <input type="text" class="form-control" name="age" placeholder="年龄">
+            </div>  
+
+            <div class="form-group">
+                <label for="">余额</label>
+                <input type="text" class="form-control" name="ac" placeholder="余额">
+            </div>
+
+            <div class="form-group">
+                <label for="">入职时间</label>
+                <input type="text" class="form-control" name="ctime" placeholder="入职时间" id="dt">
+            </div>
+
+            <div class="form-group">
+                <label for="">性别</label>
+                <select class="form-control" id="" name="gd">
+                    {% for item in gender_choices %}
+                    <option value="{{item.0}}">{{item.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="">部门</label>
+                <select class="form-control" id="" name="dp">
+                    {% for item in depart_list %}
+                    <option value="{{item.id}}">{{item.title}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" id="">提交</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'dateTime/moment.min.js' %}"></script>
+<script src="{% static 'dateTime/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'dateTime/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+<script>
+    $(function(){
+        $('#dt').datepicker({
+            format: 'yyyy-mm-dd',
+            language: "zh-CN",
+            autoclose: true
+        });
+    })
+</script>
+{% endblock %}

@@ -1,0 +1,278 @@
+{% extends "index_layout.html" %}
+{% load static %}
+
+{% block title %}
+<title>订单列表</title>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div  style="margin-bottom: 10px">
+        <input type="button" value="新建订单" class="btn btn-primary" id="buttonAdd">
+    </div>
+
+<!-- 新建对话框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+            <form class="panel-body" novalidate id="addForm">
+                <div class="clearfix">
+                    {% for field in form %}
+                        <div class="col-xs-6">
+                            <div class="form-group" style="position: relative; margin-bottom: 25px;">
+                                <label for="">{{field.label}}</label>
+                                {{ field }}
+                                <span style="color: red; position: absolute ;" class="error_msg">{{ field.errors.0 }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button id="btnSave" type="button" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 删除 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+  <div class="modal-dialog" role="document">
+      <div class="alert alert-danger alert-dismissible fade in" role="alert">
+        <h4 class="modal-title" id="deleteModalLabel">确定删除吗</h4>
+        <p style="text-align: right">
+           <button id="btnConfirmDelete" type="button" class="btn btn-danger btn-xs" >确定</button>
+           <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">取 消</button>
+        </p>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">
+        <span class="glyphicon glyphicon-th-list" aria-hidden="true">
+            管理员列表
+        </span>
+    </div>
+
+    <!-- Table -->
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>订单号</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>状态</th>
+                <th>管理员</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr uid="{{ obj.id }}">
+                <th>{{ obj.id }}</th>
+                <td>{{ obj.oid }}</td>
+                <td>{{ obj.title }}</td>
+                <td>{{ obj.price }}</td>
+                <td>{{ obj.get_status_display }}</td>
+                <td>{{ obj.admin.username }}</td>
+                <td>
+                    <input uid="{{ obj.id }}" class="btn btn-primary btn-xs btn-edit" type="button" value="编辑">
+                    <input uid="{{ obj.id }}" class="btn btn-danger btn-xs btn-delete" type="button" value="删除">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+<div class="container" style="margin: 0 auto; display: flex; justify-content: center; align-items: center;">
+    <ul class="pagination">
+        {{page_string}}
+    </ul>
+</div>
+
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block js %}
+
+<script type="text/javascript">
+    var DELETE_ID;
+    var Edit_ID;
+
+    $(document).ready(function() {
+        // 页面加载完成后自动执行
+        binBtnAddEvent();
+        binBtnSaveEvent();
+        binBtnDeleteEvent();
+        binBtnConfirmDelete()
+        binBtnEditEvent()
+});
+
+    function binBtnAddEvent(){
+        $("#buttonAdd").click(function (){
+            Edit_ID = undefined;
+
+            $("#addForm")[0].reset()
+
+            $("#myModalLabel").text("新建")
+
+            $('#myModal').modal('show')
+        })
+    }
+
+    function binBtnSaveEvent(){
+        $("#btnSave").click(function (){
+            $('.error_msg').empty();
+
+            if(Edit_ID){
+                doEdit();
+            }
+            else {
+                doAdd()
+            }
+        })
+    }
+
+    function doEdit(){
+        $.ajax({
+                url: "/order/edit/" + "?uid=" + Edit_ID,
+                type: "post",    // post
+                data: $("#addForm").serialize(),
+                dataType: "JSON",       // 拿到的数据序列化回json对象
+                success:function(res){
+                    console.log(res);
+                    if (res.status) {
+                        $("#addForm")[0].reset();
+                        location.reload()
+                        $('#myModal').modal('hide')
+
+                    }else{
+                        if(res.tips){
+                            alert(res.tips)
+                        }
+                        else {
+                            $.each(res.error, function(name, data){
+                            $("#id_" + name).next().text(data[0]);
+                        })
+                        }
+
+                    }
+                }
+            })
+    }
+
+
+
+    function doAdd(){
+        $.ajax({
+                url: "/order/add/",
+                type: "post",    // post
+                data: $("#addForm").serialize(),
+                dataType: "JSON",       // 拿到的数据序列化回json对象
+                success:function(res){
+                    console.log(res);
+                    if (res.status) {
+                        $("#addForm")[0].reset();
+                        location.reload()
+                        $('#myModal').modal('hide')
+
+                    }else{
+                        $.each(res.error, function(name, data){
+                            $("#id_" + name).next().text(data[0]);
+                        })
+                    }
+                }
+            })
+    }
+
+
+
+    function binBtnDeleteEvent(){
+        $(".btn-delete").click(function (){
+            $('#deleteModal').modal('show');
+            DELETE_ID = $(this).attr("uid");
+        })
+    }
+
+
+    function  binBtnConfirmDelete(){
+        $("#btnConfirmDelete").click(function (){
+
+            $.ajax({
+                url: "/order/delete/",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    "uid": DELETE_ID
+                },
+                success: function (res){
+                    if(res.status){
+                        {#alert("删除成功")#}
+                        {#$('#deleteModal').modal('hide');#}
+                        {#$("tr[uid='" + DELETE_ID + "']").remove()#}
+                        {#DELETE_ID = 0;#}
+
+                        location.reload();
+                    }
+                    else {
+                        alert(res.error)
+                    }
+                }
+            })
+        })
+    }
+
+    function binBtnEditEvent(){
+        $(".btn-edit").click(function (){
+
+            var uid = $(this).attr("uid");
+            Edit_ID = uid
+            $.ajax({
+                url: "/order/detail/",
+                type: "get",
+                data:{
+                    uid: uid
+                },
+                dataType: "JSON",
+                success: function (res){
+                    if (res.status){
+                        $("#myModalLabel").text("编辑")
+
+                        $.each(res.data, function (name, value){
+                            $("#id_" + name).val(value)
+                        })
+
+                        $('#myModal').modal('show')
+
+                    }else {
+                        alert(res.error)
+                    }
+                }
+
+            })
+        })
+    }
+
+
+</script>
+{% endblock %}
